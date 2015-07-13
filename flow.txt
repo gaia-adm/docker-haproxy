@@ -1,0 +1,34 @@
+1. Create HAProxy image based on library/haproxy with addition of sudo, iptables, procps, curl, vim and confd
+apt-get update
+apt-get install sudo
+apt-get install iptables
+apt-get install procps
+apt-get install vim
+apt-get install curl
+curl -L https://github.com/kelseyhightower/confd/releases/download/v0.10.0/confd-0.10.0-linux-amd64 -o /usr/local/bin/confd
+chmod +x /usr/local/bin/confd
+mkdir -p /etc/confd/conf.d
+mkdir -p /etc/confd/templates
+
+2. Copy haproxy.toml to /etc/confd/conf.d/ of the image
+3. Copy haproxy.tmpl to /etc/confd/templates/ of the image
+4. Copy confd-watch to /usr/local/bin/ of the image
+5. Make confd-watch executable
+chmod +x /usr/local/bin/confd-watch
+
+BUILD:
+docker build -f DockerLibrary -t boris/haproxy .
+RUN:
+docker run -d --privileged=true --name haproxy -p 80:80 -p 443:443 -p 1936:1936 -e "HOST_IP=172.17.8.101" -e "SERVICE_80_NAME=proxy" -e "SERVICE_443_NAME=sproxy" -e "SERVICE_1936_NAME=statsproxy" -v /dev/log:/dev/log boris/haproxy /usr/local/bin/confd-watch
+
+
+Open issues:
+*** (SOLVED: -v /dev/log:dev/log and log to /dev/log) Logging
+*** (SOLVED: https://medium.com/@Drew_Stokes/actual-zero-downtime-with-haproxy-18318578fde6 MUST RUN with --privileged=true) Zero downtime 
+*** SSL
+*** Error in log (input is not clear): 2015-07-13T06:26:35Z core-01 ./confd[17015]: ERROR "flag provided but not defined: -time\nUsage:\n  -block-attempts=0: Wait until the units are stopped, performing up to N attempts before giving up. A value of 0 indicates no limit. Does not apply to global units.\n  -no-block=false: Do not wait until the units have stopped before exiting. Always the case for global units.\nflag provided but not defined: -time\nError creating units: unable to find Unit(haproxy-lib.service) in Registry or on filesystem\n"
+*** (SOLVED: with ${COREOS_PUBLIC_IPV4} )HOST_IP - where from take it, what the deployment looks like
+*** (SOLVED: typos) fleet deployment
+
+
+

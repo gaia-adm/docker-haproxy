@@ -1,0 +1,10 @@
+[template]
+src = "haproxy.tmpl"
+dest = "/usr/local/etc/haproxy/haproxy.cfg"
+keys = [
+  "/skydns/local/skydns/mgs",
+  "/skydns/local/skydns/sts"
+]
+check_cmd = "/usr/local/sbin/haproxy -c -f /usr/local/etc/haproxy/haproxy.cfg"
+reload_cmd = "sudo iptables -I INPUT -p tcp -m multiport --ports 80,443 --syn -j DROP && sleep 0.5 && /usr/local/sbin/haproxy -f /usr/local/etc/haproxy/haproxy.cfg -p /var/run/haproxy.pid -D -sf $(cat /var/run/haproxy.pid); sudo iptables -D INPUT -p tcp -m multiport --ports 80,443 --syn -j DROP"
+
