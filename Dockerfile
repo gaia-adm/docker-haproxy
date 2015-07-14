@@ -11,7 +11,11 @@ COPY haproxy.toml /etc/confd/conf.d/
 COPY haproxy.tmpl /etc/confd/templates/
 COPY haproxy.cfg.INIT /usr/local/etc/haproxy/haproxy.cfg
 
+COPY device.pem /etc/ssl/certs/
+
 COPY confd-watch /usr/local/bin/
 RUN chmod +x /usr/local/bin/confd-watch
+
+EXPOSE 80 443 1936
 
 CMD ["/usr/local/bin/confd-watch"]

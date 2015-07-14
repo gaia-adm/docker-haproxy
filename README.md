@@ -17,8 +17,16 @@ See also flow.txt file for more details. [Gaia-fleet] (https://github.com/gaia-a
 Currently mgs and sts services supported. Two files must be updated, in order to add new service: **haproxy.tmpl** (the same way as you would update regular haproxy.cfg 
 but also with what confd needs) and **haproxy.toml** (add skydns keys). Use mgs and sts configuration as the reference.
 
+## SSL termination
+HAProxy listen for both ports 80 and 443 to serve http and https traffic accordingly. Default certificate device.pem was issued for skydns.local domain.
+
+See haproxy.tmpl comments if you need to:
+- Close http traffic completely
+- Redirect flow starting as http to https
+
+In any SSL configuration /stats page is available on port 1936 with credentials admin/admin.
+
 ## TBD:
-- SSL termination
 - Potential improvements of haproxy.toml (mostly permissions)
-- HAProxy configuration tuning (haproxy.cfg)
+- HAProxy configuration (performance) tuning (haproxy.cfg)
 
