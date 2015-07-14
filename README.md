@@ -24,7 +24,7 @@ See haproxy.tmpl comments if you need to:
 - Close http traffic completely
 - Redirect flow starting as http to https
 
-In any SSL configuration /stats page is available on port 1936 with credentials admin/admin.
+In any SSL configuration /stats page is available over http on port 1936 with credentials admin/admin.
 
 ## TBD:
 - Potential improvements of haproxy.toml (mostly permissions)
