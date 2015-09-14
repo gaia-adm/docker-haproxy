@@ -42,8 +42,10 @@ frontend all
     rspirep ^Location:\ http://(.*)  Location:\ https://\1  if { ssl_fc }
     acl url_mgs path_beg /mgs
     acl url_sts path_beg /sts
+    acl url_ru path_beg /result-upload
     use_backend mgs-backend if url_mgs
     use_backend sts-backend if url_sts
+    use_backend result-upload-service-backend if url_ru
 
 
 backend mgs-backend
@@ -54,6 +56,12 @@ backend mgs-backend
 
 backend sts-backend
 {{range gets "/skydns/local/skydns/sts/*"}}
+{{$data := json .Value}}
+    server {{$data.host}}:{{$data.port}} {{$data.host}}:{{$data.port}} check
+{{end}}
+
+backend result-upload-service-backend
+{{range gets "/skydns/local/skydns/result-upload-service/*"}}
 {{$data := json .Value}}
     server {{$data.host}}:{{$data.port}} {{$data.host}}:{{$data.port}} check
 {{end}}
