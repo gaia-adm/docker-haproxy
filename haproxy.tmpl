@@ -32,9 +32,9 @@ defaults
         errorfile 503 /usr/local/etc/haproxy/errors/503.http
         errorfile 504 /usr/local/etc/haproxy/errors/504.http
 
-frontend all
-    # Comment next line to fully close port 80
-    bind :80
+frontend services-frontend
+    # Comment next line to fully close port 88
+    bind :88
     bind :443 ssl crt /etc/ssl/certs/device.pem
     # Uncomment next line to enforce https connection
     #redirect scheme https if !{ ssl_fc }
@@ -46,6 +46,11 @@ frontend all
     use_backend mgs-backend if url_mgs
     use_backend sts-backend if url_sts
     use_backend result-upload-service-backend if url_ru
+
+frontend ui-frontend
+    bind :80
+    rspirep ^Location:\ http://(.*)  Location:\ https://\1  if { ssl_fc }
+    use_backend ui-backend
 
 
 backend mgs-backend
@@ -65,6 +70,13 @@ backend result-upload-service-backend
 {{$data := json .Value}}
     server {{$data.host}}:{{$data.port}} {{$data.host}}:{{$data.port}} check
 {{end}}
+
+backend ui-backend
+{{range gets "/skydns/local/skydns/grafana-preconfigured/*"}}
+{{$data := json .Value}}
+    server {{$data.host}}:{{$data.port}} {{$data.host}}:{{$data.port}} check
+{{end}}
+
 
 listen stats
    # Uncomment next line to access stats over https
