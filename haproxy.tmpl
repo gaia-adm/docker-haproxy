@@ -72,7 +72,7 @@ backend result-upload-service-backend
 {{end}}
 
 backend ui-backend
-{{range gets "/skydns/local/skydns/grafana-preconfigured/*"}}
+{{range gets "/skydns/local/skydns/grafana/*"}}
 {{$data := json .Value}}
     server {{$data.host}}:{{$data.port}} {{$data.host}}:{{$data.port}} check
 {{end}}
