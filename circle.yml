@@ -3,7 +3,8 @@ machine:
     - docker
 dependencies:
   override:
-    - docker build -t gaiaadm/haproxy:$BUILD_TAG .
+    - docker build -t gaiaadm/haproxy .
+    - docker tag gaiaadm/haproxy gaiaadm/haproxy:$CIRCLE_BUILD_NUM
 test:
   override:
     - /bin/true
