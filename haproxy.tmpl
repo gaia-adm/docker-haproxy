@@ -1,5 +1,5 @@
 global
-        log /dev/log    local2 debug
+        log /dev/log    local2 notice
         maxconn 3072
         tune.ssl.default-dh-param 2048
 
@@ -19,8 +19,9 @@ defaults
         option forwardfor
         option http-server-close
         option  httplog
-        # option        dontlognull
-        # option        dontlog-normal
+        option log-separate-errors
+        option dontlognull
+        option dontlog-normal
         timeout connect 5000
         timeout client  50000
         timeout server  50000
