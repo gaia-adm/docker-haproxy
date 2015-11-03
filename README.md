@@ -2,7 +2,7 @@
 
 HAProxy for load balancing and reverse proxy
 
-Based on library/haproxy docker image (HAProxy v.1.5.14) and enriched with sudo, iptables, procps, curl, vim and confd.
+Based on library/haproxy docker image (HAProxy v.1.6.1) and enriched with sudo, iptables, procps, curl, vim and confd.
 
 Confd automatically syncs between /etc/confd/templates/haproxy.tmpl template and /usr/local/etc/haproxy/haproxy.cfg based on current etcd configuration.
 Template resource config is /etc/confd/conf.d/haproxy.toml. /usr/local/bin/confd-watch checks every 10 seconds that template and cfg file are synced and if they don't - run a sync.

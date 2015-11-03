@@ -1,4 +1,4 @@
-FROM haproxy:latest
+FROM haproxy:1.6.1
 
 RUN apt-get -qq -y update \
  && apt-get -qq -y install sudo iptables procps vim curl \
