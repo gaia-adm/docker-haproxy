@@ -1,3 +1,5 @@
+[![](https://badge.imagelayers.io/gaiaadm/haproxy:latest.svg)](https://imagelayers.io/?images=gaiaadm/haproxy:latest 'Get your own badge on imagelayers.io')
+
 # docker-haproxy
 
 HAProxy for load balancing and reverse proxy
