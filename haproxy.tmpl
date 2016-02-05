@@ -45,10 +45,14 @@ frontend services-frontend
     acl url_sts path_beg /sts
     acl url_whs path_beg /wh
     acl url_ru path_beg /result-upload
+    acl url_dex path_beg /auth
+    acl url_dex path_beg /token
+    acl url_dex path_beg /keys
     use_backend mgs-backend if url_mgs
     use_backend sts-backend if url_sts
     use_backend whs-backend if url_whs
     use_backend result-upload-service-backend if url_ru
+    use_backend dexworker-backend if url_dex
 
 frontend ui-frontend
     bind :80
@@ -80,11 +84,22 @@ backend result-upload-service-backend
     server {{$data.host}}:{{$data.port}} {{$data.host}}:{{$data.port}} check
 {{end}}
 
-backend ui-backend
-{{range gets "/skydns/local/skydns/grafana/*"}}
+backend dexworker-backend
+{{range gets "/skydns/local/skydns/dexworker/*"}}
 {{$data := json .Value}}
     server {{$data.host}}:{{$data.port}} {{$data.host}}:{{$data.port}} check
 {{end}}
+
+
+
+backend ui-backend
+acl cookie_set hdr_sub(cookie) it
+redirect location http://gaia.skydns.local:88/sts/login.jsp code 302 if !cookie_set
+{{range gets "/skydns/local/skydns/kibana/*"}}
+{{$data := json .Value}}
+    server {{$data.host}}:{{$data.port}} {{$data.host}}:{{$data.port}} check
+{{end}}
+
 
 
 listen stats
