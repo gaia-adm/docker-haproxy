@@ -48,6 +48,7 @@ frontend services-frontend
     acl url_dex path_beg /auth
     acl url_dex path_beg /token
     acl url_dex path_beg /keys
+    acl url_dex path_beg /register
     use_backend mgs-backend if url_mgs
     use_backend sts-backend if url_sts
     use_backend whs-backend if url_whs
