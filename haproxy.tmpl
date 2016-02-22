@@ -69,6 +69,19 @@ backend mgs-backend
 {{end}}
 
 backend sts-backend
+# save request scheme for further redirect
+http-request set-header X-Forwarded-Proto https if { ssl_fc }
+http-request set-header X-Forwarded-Proto http if !{ ssl_fc }
+http-request set-var(txn.scheme) req.hdr(X-Forwarded-Proto)
+# save request host for further redirect
+http-request set-var(txn.host) req.hdr(Host)
+# define acl
+http-request set-var(txn.path) path
+acl url_callback var(txn.path) -m end /callback
+http-response replace-value Location /sts/welcome.jsp %[var(txn.scheme)]://%[var(txn.host)] if url_callback
+http-response replace-value Location (.*):88 \1:80 if !{ ssl_fc } url_callback
+http-response replace-value Location (.*):444 \1:443 if { ssl_fc } url_callback
+
 {{range gets "/skydns/local/skydns/sts/*"}}
 {{$data := json .Value}}
     server {{$data.host}}:{{$data.port}} {{$data.host}}:{{$data.port}} check
