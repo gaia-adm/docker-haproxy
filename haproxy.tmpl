@@ -108,7 +108,7 @@ backend dexworker-backend
 
 
 backend ui-backend
-acl cookie_set hdr_sub(cookie) it
+acl cookie_set hdr_sub(cookie) gaia.it
 #redirect location http://gaia.skydns.local:88/sts/login.jsp code 302 if !cookie_set
 
 http-request set-header X-Forwarded-Proto https if { ssl_fc } !cookie_set
