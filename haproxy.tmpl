@@ -36,7 +36,7 @@ defaults
 frontend services-frontend
     # Comment next line to fully close port 88
     bind :88
-    bind :443 ssl crt /etc/ssl/certs/device.pem
+    bind :444 ssl crt /etc/ssl/certs/device.pem
     # Uncomment next line to enforce https connection
     #redirect scheme https if !{ ssl_fc }
     # Always keep the next line to prevent falling back to http during redirection (HTTP-302, no trailing slash) when using https
@@ -45,13 +45,19 @@ frontend services-frontend
     acl url_sts path_beg /sts
     acl url_whs path_beg /wh
     acl url_ru path_beg /result-upload
+    acl url_dex path_beg /auth
+    acl url_dex path_beg /token
+    # No need - only accessible interlnally via skydns: acl url_dex path_beg /keys
+    acl url_dex path_beg /register
     use_backend mgs-backend if url_mgs
     use_backend sts-backend if url_sts
     use_backend whs-backend if url_whs
     use_backend result-upload-service-backend if url_ru
+    use_backend dexworker-backend if url_dex
 
 frontend ui-frontend
     bind :80
+    bind :443 ssl crt /etc/ssl/certs/device.pem
     rspirep ^Location:\ http://(.*)  Location:\ https://\1  if { ssl_fc }
     use_backend ui-backend
 
@@ -63,6 +69,19 @@ backend mgs-backend
 {{end}}
 
 backend sts-backend
+# save request scheme for further redirect
+http-request set-header X-Forwarded-Proto https if { ssl_fc }
+http-request set-header X-Forwarded-Proto http if !{ ssl_fc }
+http-request set-var(txn.scheme) req.hdr(X-Forwarded-Proto)
+# save request host for further redirect
+http-request set-var(txn.host) req.hdr(Host)
+# define acl
+http-request set-var(txn.path) path
+acl url_callback var(txn.path) -m end /callback
+http-response replace-value Location /sts/welcome.jsp %[var(txn.scheme)]://%[var(txn.host)] if url_callback
+http-response replace-value Location (.*):88 \1:80 if !{ ssl_fc } url_callback
+http-response replace-value Location (.*):444 \1:443 if { ssl_fc } url_callback
+
 {{range gets "/skydns/local/skydns/sts/*"}}
 {{$data := json .Value}}
     server {{$data.host}}:{{$data.port}} {{$data.host}}:{{$data.port}} check
@@ -80,11 +99,31 @@ backend result-upload-service-backend
     server {{$data.host}}:{{$data.port}} {{$data.host}}:{{$data.port}} check
 {{end}}
 
-backend ui-backend
-{{range gets "/skydns/local/skydns/grafana/*"}}
+backend dexworker-backend
+{{range gets "/skydns/local/skydns/dexworker/*"}}
 {{$data := json .Value}}
     server {{$data.host}}:{{$data.port}} {{$data.host}}:{{$data.port}} check
 {{end}}
+
+
+
+backend ui-backend
+acl cookie_set hdr_sub(cookie) gaia.it
+#redirect location http://gaia.skydns.local:88/sts/login.jsp code 302 if !cookie_set
+
+http-request set-header X-Forwarded-Proto https if { ssl_fc } !cookie_set
+http-request set-header X-Forwarded-Proto http if !{ ssl_fc } !cookie_set
+http-request set-header X-Forwarded-Port 444 if { ssl_fc } !cookie_set
+http-request set-header X-Forwarded-Port 88 if !{ ssl_fc } !cookie_set
+http-request set-header X-Location-Path %[path] if !cookie_set
+
+http-request redirect location %[hdr(X-Forwarded-Proto)]://%[hdr(Host)]:%[hdr(X-Forwarded-Port)]/sts/login.jsp if !cookie_set
+
+{{range gets "/skydns/local/skydns/kibana/*"}}
+{{$data := json .Value}}
+    server {{$data.host}}:{{$data.port}} {{$data.host}}:{{$data.port}} check
+{{end}}
+
 
 
 listen stats
