@@ -49,6 +49,8 @@ frontend services-frontend
     acl url_dex path_beg /token
     # No need - only accessible interlnally via skydns: acl url_dex path_beg /keys
     acl url_dex path_beg /register
+    acl url_dex path_beg /send-reset-password
+    acl url_dex path_beg /reset-password
     use_backend mgs-backend if url_mgs
     use_backend sts-backend if url_sts
     use_backend whs-backend if url_whs
