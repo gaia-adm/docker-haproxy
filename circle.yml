@@ -9,7 +9,7 @@ dependencies:
   override:
     - docker build -t gaiaadm/haproxy .
     - docker tag gaiaadm/haproxy gaiaadm/haproxy:$CIRCLE_BUILD_NUM-$CIRCLE_BRANCH
-    - docker tag ggaiaadm/haproxy gaiaadm/haproxy:$CIRCLE_BRANCH
+    - docker tag gaiaadm/haproxy gaiaadm/haproxy:$CIRCLE_BRANCH
 test:
   override:
     - /bin/true
