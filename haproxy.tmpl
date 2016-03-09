@@ -90,6 +90,9 @@ http-response replace-value Location (.*):444 \1:443 if { ssl_fc } url_callback
 {{end}}
 
 backend whs-backend
+# remove Content-Encoding header when its value is invalid - solves body-parser error due to Stash plugin bug
+reqdel ^Content-Encoding:((?!\s*gzip)(?!\s*deflate)(?!\s*compress)(?!\s*identity)).*$
+
 {{range gets "/skydns/local/skydns/whs/*"}}
 {{$data := json .Value}}
     server {{$data.host}}:{{$data.port}} {{$data.host}}:{{$data.port}} check
