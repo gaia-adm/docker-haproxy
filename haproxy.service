@@ -42,7 +42,7 @@ ExecStartPre=-/usr/bin/docker rm haproxy
 ExecStart=/usr/bin/docker run \
  --privileged \
  --name haproxy \
- -p 88:88 -p 80:80 -p 443:443 -p 1936:1936 \
+ -p 88:88 -p 80:80 -p 443:443 -p 444:444 -p 1936:1936 \
  -e HOST_IP=${COREOS_PRIVATE_IPV4} \
  -e SERVICE_80_NAME=proxy \
  -e SERVICE_443_NAME=sproxy \
