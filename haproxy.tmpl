@@ -73,7 +73,7 @@ backend mgs-backend
 backend sts-backend
 # save request scheme for further redirect
 http-request set-header X-Forwarded-Proto https if { ssl_fc }
-http-request set-header X-Forwarded-Proto http if !{ ssl_fc }
+http-request set-header X-Forwarded-Proto https if !{ ssl_fc }
 http-request set-var(txn.scheme) req.hdr(X-Forwarded-Proto)
 # save request host for further redirect
 http-request set-var(txn.host) req.hdr(Host)
