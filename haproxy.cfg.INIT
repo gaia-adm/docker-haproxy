@@ -1,5 +1,5 @@
 global
-        log /dev/log    local2 notice
+        log /dev/log    local2 info
         maxconn 3072
 
 defaults
@@ -10,7 +10,7 @@ defaults
         option  httplog
         option log-separate-errors
         option dontlognull
-        option dontlog-normal
+#        option dontlog-normal
         timeout connect 5000
         timeout client  50000
         timeout server  50000
