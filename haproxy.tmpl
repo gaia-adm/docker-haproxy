@@ -1,5 +1,5 @@
 global
-        log /dev/log    local2 notice
+        log /dev/log    local2 info
         maxconn 3072
         tune.ssl.default-dh-param 2048
 
@@ -21,7 +21,7 @@ defaults
         option  httplog
         option log-separate-errors
         option dontlognull
-        option dontlog-normal
+#        option dontlog-normal
         timeout connect 5000
         timeout client  50000
         timeout server  50000
@@ -43,6 +43,7 @@ frontend services-frontend
     rspirep ^Location:\ http://(.*)  Location:\ https://\1  if { ssl_fc }
     acl url_mgs path_beg /mgs
     acl url_sts path_beg /sts
+    # ACL for webhook service - LEGACY; should be deleted in favor of the ACL under default_ports frontend after all our datasources move to the new format
     acl url_whs path_beg /wh
     acl url_ru path_beg /result-upload
     acl url_dex path_beg /auth
@@ -57,12 +58,19 @@ frontend services-frontend
     use_backend result-upload-service-backend if url_ru
     use_backend dexworker-backend if url_dex
 
-frontend ui-frontend
+frontend default_ports
     bind :80
     bind :443 ssl crt /etc/ssl/certs/device.pem
-    rspirep ^Location:\ http://(.*)  Location:\ https://\1  if { ssl_fc }
-    use_backend ui-backend
-
+    # ACL for webhook service: webhook.<domain>.gaiahub.io/wh/*
+    acl url_whs hdr_beg(host) webhook.  path_beg /wh 
+    # ACL for kibana and all the URLs it uses (called from the client side)
+    acl url_kibana path_beg /app /bundles /elasticsearch
+    # ACL for the initial call to kibana, which does not have any root context by default before redirecting to /app
+    acl is_root path /
+    rspirep ^Location:\ http://(.*)  Location:\ https://\1  if { ssl_fc } !url_whs
+    use_backend whs-backend if url_whs
+    use_backend ui-backend if url_kibana
+    use_backend ui-backend if is_root
 
 backend mgs-backend
 {{range gets "/skydns/local/skydns/mgs/*"}}
