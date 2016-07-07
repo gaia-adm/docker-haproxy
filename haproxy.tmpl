@@ -45,7 +45,9 @@ frontend services-frontend
     acl url_sts path_beg /sts
     # ACL for webhook service - LEGACY; should be deleted in favor of the ACL under default_ports frontend after all our datasources move to the new format
     acl url_whs path_beg /wh
+	# Admin UI - client and server
     acl url_gau path_beg /gau
+	acl url_gau path_beg /gab
     acl url_ru path_beg /result-upload
     acl url_dex path_beg /auth
     acl url_dex path_beg /token
