@@ -45,6 +45,7 @@ frontend services-frontend
     acl url_sts path_beg /sts
     # ACL for webhook service - LEGACY; should be deleted in favor of the ACL under default_ports frontend after all our datasources move to the new format
     acl url_whs path_beg /wh
+    acl url_gau path_beg /gau
     acl url_ru path_beg /result-upload
     acl url_dex path_beg /auth
     acl url_dex path_beg /token
@@ -55,6 +56,7 @@ frontend services-frontend
     use_backend mgs-backend if url_mgs
     use_backend sts-backend if url_sts
     use_backend whs-backend if url_whs
+    use_backend gau-backend if url_gau
     use_backend result-upload-service-backend if url_ru
     use_backend dexworker-backend if url_dex
 
@@ -62,7 +64,7 @@ frontend default_ports
     bind :80
     bind :443 ssl crt /etc/ssl/certs/device.pem
     # ACL for webhook service: webhook.<domain>.gaiahub.io/wh/*
-    acl url_whs hdr_beg(host) webhook.  path_beg /wh 
+    acl url_whs hdr_beg(host) webhook.  path_beg /wh
     # ACL for kibana and all the URLs it uses (called from the client side)
     acl url_kibana path_beg /app /bundles /elasticsearch
     # ACL for the initial call to kibana, which does not have any root context by default before redirecting to /app
@@ -102,6 +104,12 @@ backend whs-backend
 reqdel ^Content-Encoding:((?!\s*gzip)(?!\s*deflate)(?!\s*compress)(?!\s*identity)).*$
 
 {{range gets "/skydns/local/skydns/whs/*"}}
+{{$data := json .Value}}
+    server {{$data.host}}:{{$data.port}} {{$data.host}}:{{$data.port}} check
+{{end}}
+
+backend gau-backend
+{{range gets "/skydns/local/skydns/gau/*"}}
 {{$data := json .Value}}
     server {{$data.host}}:{{$data.port}} {{$data.host}}:{{$data.port}} check
 {{end}}
