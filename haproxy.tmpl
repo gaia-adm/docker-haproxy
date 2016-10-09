@@ -45,6 +45,8 @@ frontend services-frontend
     acl url_sts path_beg /sts
     # ACL for webhook service - LEGACY; should be deleted in favor of the ACL under default_ports frontend after all our datasources move to the new format
     acl url_whs path_beg /wh
+    # ACL for account-management-server service: acms.<domain>.gaiahub.io/acms
+    acl url_acms hdr_beg(host) acms. path_beg /acms
 	# Admin UI - client and server
     acl url_gau path_beg /gau
 	acl url_gau path_beg /gab
@@ -58,6 +60,7 @@ frontend services-frontend
     use_backend mgs-backend if url_mgs
     use_backend sts-backend if url_sts
     use_backend whs-backend if url_whs
+    use_backend acmserver if url_acms
     use_backend gau-backend if url_gau
     use_backend result-upload-service-backend if url_ru
     use_backend dexworker-backend if url_dex
@@ -67,6 +70,8 @@ frontend default_ports
     bind :443 ssl crt /etc/ssl/certs/device.pem
     # ACL for webhook service: webhook.<domain>.gaiahub.io/wh/*
     acl url_whs hdr_beg(host) webhook.  path_beg /wh
+    # ACL for account-management-client service: acmc.<domain>.gaiahub.io/acmc
+    acl url_acmc hdr_beg(host) acmc. path_beg /acmc
     # ACL for kibana and all the URLs it uses (called from the client side)
     acl url_kibana path_beg /app /bundles /elasticsearch
     # ACL for the initial call to kibana, which does not have any root context by default before redirecting to /app
@@ -75,6 +80,19 @@ frontend default_ports
     use_backend whs-backend if url_whs
     use_backend ui-backend if url_kibana
     use_backend ui-backend if is_root
+    use_backend acmclient if url_acmc
+
+backend acmclient
+{{range gets "/skydns/local/skydns/acmclient/*"}}
+{{$data := json .Value}}
+    server {{$data.host}}:{{$data.port}} {{$data.host}}:{{$data.port}} check
+{{end}}
+
+backend acmserver
+{{range gets "/skydns/local/skydns/acmserver/*"}}
+{{$data := json .Value}}
+    server {{$data.host}}:{{$data.port}} {{$data.host}}:{{$data.port}} check
+{{end}}
 
 backend mgs-backend
 {{range gets "/skydns/local/skydns/mgs/*"}}
@@ -131,7 +149,7 @@ backend dexworker-backend
 
 
 backend ui-backend
-acl cookie_set hdr_sub(cookie) gaia.it
+acl cookie_set hdr_sub(cookie) gaia.token
 #redirect location http://gaia.skydns.local:88/sts/login.jsp code 302 if !cookie_set
 
 http-request set-header X-Forwarded-Proto https if { ssl_fc } !cookie_set
