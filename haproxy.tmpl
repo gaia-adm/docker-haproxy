@@ -76,13 +76,13 @@ frontend default_ports
     acl url_kibana path_beg /app /bundles /elasticsearch
     # ACL for the initial call to kibana, which does not have any root context by default before redirecting to /app
     acl is_root path /
-    rspirep ^Location:\ http://(.*)  Location:\ https://\1  if { ssl_fc } !url_whs
+    rspirep ^Location:\ http://(.*)  Location:\ https://\1  if { ssl_fc } !url_whs !url_acmc
     use_backend whs-backend if url_whs
     use_backend ui-backend if url_kibana
     use_backend ui-backend if is_root
-    use_backend acmclient if url_acmc
+    use_backend acmclient-backend if url_acmc
 
-backend acmclient
+backend acmclient-backend
 {{range gets "/skydns/local/skydns/acmclient/*"}}
 {{$data := json .Value}}
     server {{$data.host}}:{{$data.port}} {{$data.host}}:{{$data.port}} check
@@ -158,7 +158,7 @@ http-request set-header X-Forwarded-Port 444 if { ssl_fc } !cookie_set
 http-request set-header X-Forwarded-Port 88 if !{ ssl_fc } !cookie_set
 http-request set-header X-Location-Path %[path] if !cookie_set
 
-http-request redirect location %[hdr(X-Forwarded-Proto)]://%[hdr(Host)]:%[hdr(X-Forwarded-Port)]/sts/login.jsp if !cookie_set
+http-request redirect location %[hdr(X-Forwarded-Proto)]://%[hdr(Host)]:%[hdr(X-Forwarded-Port)]/sts/login.jsp if !cookie_set 
 
 {{range gets "/skydns/local/skydns/kibana/*"}}
 {{$data := json .Value}}
