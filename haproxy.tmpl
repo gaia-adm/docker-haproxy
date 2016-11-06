@@ -51,19 +51,19 @@ frontend services-frontend
     acl url_gau path_beg /gau
 	acl url_gau path_beg /gab
     acl url_ru path_beg /result-upload
-    acl url_dex path_beg /auth
-    acl url_dex path_beg /token
+#    acl url_dex path_beg /auth
+#    acl url_dex path_beg /token
     # No need - only accessible interlnally via skydns: acl url_dex path_beg /keys
-    acl url_dex path_beg /register
-    acl url_dex path_beg /send-reset-password
-    acl url_dex path_beg /reset-password
+#    acl url_dex path_beg /register
+#    acl url_dex path_beg /send-reset-password
+#    acl url_dex path_beg /reset-password
     use_backend mgs-backend if url_mgs
     use_backend sts-backend if url_sts
     use_backend whs-backend if url_whs
     use_backend acmserver if url_acms
     use_backend gau-backend if url_gau
     use_backend result-upload-service-backend if url_ru
-    use_backend dexworker-backend if url_dex
+#    use_backend dexworker-backend if url_dex
 
 frontend default_ports
     bind :80
@@ -140,11 +140,11 @@ backend result-upload-service-backend
     server {{$data.host}}:{{$data.port}} {{$data.host}}:{{$data.port}} check
 {{end}}
 
-backend dexworker-backend
-{{range gets "/skydns/local/skydns/dexworker/*"}}
-{{$data := json .Value}}
-    server {{$data.host}}:{{$data.port}} {{$data.host}}:{{$data.port}} check
-{{end}}
+#backend dexworker-backend
+#{{range gets "/skydns/local/skydns/dexworker/*"}}
+#{{$data := json .Value}}
+#    server {{$data.host}}:{{$data.port}} {{$data.host}}:{{$data.port}} check
+#{{end}}
 
 
 

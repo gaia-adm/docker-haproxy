@@ -7,7 +7,6 @@ keys = [
   "/skydns/local/skydns/result-upload-service",
   "/skydns/local/skydns/kibana",
   "/skydns/local/skydns/whs",
-  "/skydns/local/skydns/dexworker",
   "/skydns/local/skydns/gau",
   "/skydns/local/skydns/acmclient",
   "/skydns/local/skydns/acmserver"
