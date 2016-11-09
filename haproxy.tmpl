@@ -45,8 +45,8 @@ frontend services-frontend
     acl url_sts path_beg /sts
     # ACL for webhook service - LEGACY; should be deleted in favor of the ACL under default_ports frontend after all our datasources move to the new format
     acl url_whs path_beg /wh
-    # ACL for account-management-server service: acms.<domain>.gaiahub.io/acms
-    acl url_acms hdr_beg(host) acms. path_beg /acms
+    # ACL for account-management-server service: <domain>.gaiahub.io/acms
+    acl url_acms path_beg /acms
 	# Admin UI - client and server
     acl url_gau path_beg /gau
 	acl url_gau path_beg /gab
