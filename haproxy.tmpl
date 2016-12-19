@@ -66,7 +66,7 @@ frontend default_ports
     # ACL for account-management-client service: acmc.<domain>.gaiahub.io/acmc
     acl url_acmc hdr_beg(host) acmc. path_beg /acmc
     # ACL for kibana and all the URLs it uses (called from the client side)
-    acl url_kibana path_beg /app /bundles /elasticsearch /kibana /plugins /api/console /api/xpack /api/monitoring /api/reporting /api/timelion /ui/favicons
+    acl url_kibana path_beg /app /bundles /elasticsearch /kibana /plugins /api/console /api/xpack /api/monitoring /api/reporting /api/timelion /api/kibana /ui/favicons
     # ACL for the initial call to kibana, which does not have any root context by default before redirecting to /app
     acl is_root path /
     rspirep ^Location:\ http://(.*)  Location:\ https://\1  if { ssl_fc } !url_whs !url_acmc
